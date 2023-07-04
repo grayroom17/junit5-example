@@ -1,6 +1,6 @@
 package com.junit5.example.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.junit5.example.dto.User;
@@ -14,12 +14,18 @@ public class UserService {
 
     private static final UserService INSTANCE = new UserService();
 
+    private final List<User> users = new ArrayList<>();
 
     public List<User> getAll() {
-        return Collections.emptyList();
+        return users;
     }
 
     public static UserService getInstance() {
         return INSTANCE;
     }
+
+    public boolean add(User user) {
+        return users.add(user);
+    }
+
 }
