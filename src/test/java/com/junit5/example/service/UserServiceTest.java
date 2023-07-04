@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserServiceTest {
@@ -102,6 +103,22 @@ class UserServiceTest {
                 () -> assertThat(users).containsValues(IVAN, PETR)
         );
 
+    }
+
+    @Test
+    void throwExceptionIfUserPasswordIsNull() {
+        assertAll(
+                () -> {
+                    IllegalArgumentException exception =
+                            assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
+                    assertThat(exception.getMessage()).isEqualTo("Username or password is null");
+                },
+                () -> {
+                    IllegalArgumentException exception =
+                            assertThrows(IllegalArgumentException.class, () -> userService.login("login", null));
+                    assertThat(exception.getMessage()).isEqualTo("Username or password is null");
+                }
+        );
     }
 
     @AfterEach
