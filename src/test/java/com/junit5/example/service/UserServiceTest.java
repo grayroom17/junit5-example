@@ -3,6 +3,7 @@ package com.junit5.example.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.junit5.example.dto.User;
 import com.junit5.example.param.resolver.UserServiceParamResolver;
@@ -12,6 +13,9 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -81,7 +85,6 @@ class UserServiceTest {
                 () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
                 () -> assertThat(users).containsValues(IVAN, PETR)
         );
-
     }
 
     @AfterEach
@@ -147,6 +150,24 @@ class UserServiceTest {
                     }
             );
         }
+
+        @ParameterizedTest
+        @MethodSource("com.junit5.example.service.UserServiceTest#getArgumentsForLoginTest")
+        void loginParametrizedTest(String login, String password, Optional<User> user) {
+            userService.add(IVAN, PETR);
+            Optional<User> loggedInUser = userService.login(login, password);
+            assertThat(loggedInUser).isEqualTo(user);
+        }
+
+    }
+
+    static Stream<Arguments> getArgumentsForLoginTest() {
+        return Stream.of(
+                Arguments.of(IVAN.getLogin(), IVAN.getPassword(), Optional.of(IVAN)),
+                Arguments.of(PETR.getLogin(), PETR.getPassword(), Optional.of(PETR)),
+                Arguments.of(PETR.getLogin(), "dummy", Optional.empty()),
+                Arguments.of("dummy", "123", Optional.empty())
+        );
     }
 
 }
