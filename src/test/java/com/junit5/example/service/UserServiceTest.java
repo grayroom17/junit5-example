@@ -5,11 +5,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.junit5.example.dto.User;
+import com.junit5.example.param.resolver.UserServiceParamResolver;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -19,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("fast")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith({
+        UserServiceParamResolver.class
+})
 class UserServiceTest {
 
     public static final User IVAN = User.of(1, "Ivan", "123");
@@ -32,10 +37,10 @@ class UserServiceTest {
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
         System.out.println("Before each: " + this);
 //        userService = UserService.getInstance();
-        userService = new UserService();
+        this.userService = userService;
     }
 
     @Test
