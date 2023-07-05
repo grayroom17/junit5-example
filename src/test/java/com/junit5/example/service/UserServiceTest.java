@@ -1,8 +1,10 @@
 package com.junit5.example.service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import com.junit5.example.dto.User;
@@ -18,10 +20,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("fast")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -85,6 +84,49 @@ class UserServiceTest {
                 () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
                 () -> assertThat(users).containsValues(IVAN, PETR)
         );
+    }
+
+    @Test
+    @Disabled("Flaky test! Refactoring needed")
+    void flakyTest() {
+        assertThat(Boolean.TRUE).isEqualTo(Boolean.FALSE);
+    }
+
+    @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
+    void repeatableTest() {
+        assertThat(Boolean.TRUE).isTrue();
+    }
+
+    @Test
+    void performanceTest() {
+        Boolean aBoolean = assertTimeout(
+                Duration.ofMillis(200),
+                () -> {
+                    TimeUnit.MILLISECONDS.sleep(199);
+                    return true;
+                }
+        );
+    }
+
+    @Test
+    void performanceTestInSeparateThread() {
+        System.out.println(Thread.currentThread().getName());
+        Boolean aBoolean = assertTimeoutPreemptively(
+                Duration.ofMillis(200),
+                () -> {
+                    System.out.println(Thread.currentThread().getName());
+                    TimeUnit.MILLISECONDS.sleep(199);
+                    return true;
+                }
+        );
+    }
+
+    @Test
+    @Timeout(value = 200, unit = TimeUnit.MILLISECONDS)
+    void performanceTestWithTimeoutAnnotation() throws InterruptedException {
+        System.out.println(Thread.currentThread().getName());
+        TimeUnit.MILLISECONDS.sleep(150);
+        assertThat(Boolean.TRUE).isTrue();
     }
 
     @AfterEach
