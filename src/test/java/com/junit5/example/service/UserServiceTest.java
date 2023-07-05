@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("fast")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserServiceTest {
 
     public static final User IVAN = User.of(1, "Ivan", "123");
@@ -64,34 +66,6 @@ class UserServiceTest {
     }
 
     @Test
-    void loginSuccessIfUserExists() {
-        userService.add(IVAN);
-        Optional<User> user = userService.login(IVAN.getLogin(), IVAN.getPassword());
-
-        assertThat(user).isPresent();
-        assertTrue(user.isPresent());
-
-        user.ifPresent(u -> assertThat(u).isEqualTo(IVAN));
-        user.ifPresent(u -> assertEquals(IVAN.getLogin(), u.getLogin()));
-        user.ifPresent(u -> assertEquals(IVAN.getPassword(), u.getPassword()));
-    }
-
-    @Test
-    void loginFailIfPasswordIsNotCorrect() {
-        userService.add(IVAN);
-        Optional<User> user = userService.login(IVAN.getLogin(), "incorrectPassword");
-
-        assertTrue(user.isEmpty());
-    }
-
-    @Test
-    void loginFailIfUserNotExists() {
-        Optional<User> user = userService.login("notExistedUser", "password");
-
-        assertTrue(user.isEmpty());
-    }
-
-    @Test
     void usersConvertedToMapById() {
         userService.add(IVAN, PETR);
 
@@ -105,22 +79,6 @@ class UserServiceTest {
 
     }
 
-    @Test
-    void throwExceptionIfUserPasswordIsNull() {
-        assertAll(
-                () -> {
-                    IllegalArgumentException exception =
-                            assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
-                    assertThat(exception.getMessage()).isEqualTo("Username or password is null");
-                },
-                () -> {
-                    IllegalArgumentException exception =
-                            assertThrows(IllegalArgumentException.class, () -> userService.login("login", null));
-                    assertThat(exception.getMessage()).isEqualTo("Username or password is null");
-                }
-        );
-    }
-
     @AfterEach
     void deleteDataFromDataBase() {
         System.out.println("After each: " + this);
@@ -129,6 +87,61 @@ class UserServiceTest {
     @AfterAll
     static void closeConnectionPool() {
         System.out.println("After all: ");
+    }
+
+    @Tag("login")
+    @Nested
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @DisplayName("Test for login functionality")
+    class LoginTest {
+
+        @Test
+        @Order(4)
+        void loginSuccessIfUserExists() {
+            userService.add(IVAN);
+            Optional<User> user = userService.login(IVAN.getLogin(), IVAN.getPassword());
+
+            assertThat(user).isPresent();
+            assertTrue(user.isPresent());
+
+            user.ifPresent(u -> assertThat(u).isEqualTo(IVAN));
+            user.ifPresent(u -> assertEquals(IVAN.getLogin(), u.getLogin()));
+            user.ifPresent(u -> assertEquals(IVAN.getPassword(), u.getPassword()));
+        }
+
+        @Test
+        @Order(3)
+        void loginFailIfPasswordIsNotCorrect() {
+            userService.add(IVAN);
+            Optional<User> user = userService.login(IVAN.getLogin(), "incorrectPassword");
+
+            assertTrue(user.isEmpty());
+        }
+
+        @Test
+        @Order(2)
+        void loginFailIfUserNotExists() {
+            Optional<User> user = userService.login("notExistedUser", "password");
+
+            assertTrue(user.isEmpty());
+        }
+
+        @Test
+        @Order(1)
+        void throwExceptionIfUserPasswordIsNull() {
+            assertAll(
+                    () -> {
+                        IllegalArgumentException exception =
+                                assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
+                        assertThat(exception.getMessage()).isEqualTo("Username or password is null");
+                    },
+                    () -> {
+                        IllegalArgumentException exception =
+                                assertThrows(IllegalArgumentException.class, () -> userService.login("login", null));
+                        assertThat(exception.getMessage()).isEqualTo("Username or password is null");
+                    }
+            );
+        }
     }
 
 }
