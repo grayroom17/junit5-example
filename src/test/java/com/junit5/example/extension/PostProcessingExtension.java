@@ -2,6 +2,7 @@ package com.junit5.example.extension;
 
 import java.lang.reflect.Field;
 
+import com.junit5.example.dao.UserDao;
 import com.junit5.example.service.UserService;
 import lombok.Getter;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -14,7 +15,7 @@ public class PostProcessingExtension implements TestInstancePostProcessor {
         Field[] fields = testInstance.getClass().getFields();
         for (Field field : fields) {
             if (field.isAnnotationPresent(Getter.class)) {
-                field.set(testInstance, new UserService());
+                field.set(testInstance, new UserService(new UserDao()));
             }
         }
     }

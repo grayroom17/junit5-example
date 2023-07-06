@@ -2,17 +2,22 @@ package com.junit5.example.service;
 
 import java.util.*;
 
+import com.junit5.example.dao.UserDao;
 import com.junit5.example.dto.User;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 @Data
+@RequiredArgsConstructor
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserService {
 
 //    private static final UserService INSTANCE = new UserService();
+
+    private final UserDao userDao;
 
     private final List<User> users = new ArrayList<>();
 
@@ -33,6 +38,10 @@ public class UserService {
     public Map<Integer, User> getMapOfAllUsers() {
         return users.stream()
                 .collect(toMap(User::getId, identity()));
+    }
+
+    public boolean delete(Integer userId){
+        return userDao.delete(userId);
     }
 
     /*public static UserService getInstance() {
